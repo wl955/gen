@@ -32,7 +32,7 @@ func LoadMsSQLMeta(db *sql.DB, sqlType, sqlDatabase, tableName string) (DbTableM
 		return nil, fmt.Errorf("unable to load ddl from ms sql: %v", err)
 	}
 
-	infoSchema, err := LoadTableInfoFromMSSqlInformationSchema(db, tableName)
+	infoSchema, err := LoadTableInfoFromMSSqlInformationSchema(db, sqlDatabase, tableName)
 	if err != nil {
 		fmt.Printf("error calling LoadTableInfoFromMSSqlInformationSchema table: %s error: %v\n", tableName, err)
 	}

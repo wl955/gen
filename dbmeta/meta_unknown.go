@@ -25,7 +25,7 @@ func LoadUnknownMeta(db *sql.DB, sqlType, sqlDatabase, tableName string) (DbTabl
 
 	m.columns = make([]*columnMeta, len(cols))
 
-	infoSchema, err := LoadTableInfoFromMSSqlInformationSchema(db, tableName)
+	infoSchema, err := LoadTableInfoFromMSSqlInformationSchema(db, sqlDatabase, tableName)
 	if err != nil {
 		fmt.Printf("NOTICE unable to load InformationSchema table: %s error: %v\n", tableName, err)
 	}

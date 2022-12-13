@@ -147,16 +147,16 @@ type InformationSchema struct {
 }
 
 // LoadTableInfoFromMSSqlInformationSchema fetch info from information_schema for ms sql database
-func LoadTableInfoFromMSSqlInformationSchema(db *sql.DB, tableName string) (primaryKey map[string]*InformationSchema, err error) {
+func LoadTableInfoFromMSSqlInformationSchema(db *sql.DB, tableSchema, tableName string) (primaryKey map[string]*InformationSchema, err error) {
 	colInfo := make(map[string]*InformationSchema)
 
 	identitySQL := fmt.Sprintf(`
 SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, ORDINAL_POSITION, COLUMN_NAME, DATA_TYPE, character_maximum_length,
 column_default, is_nullable 
 FROM information_schema.columns
-WHERE table_name = '%s' 
+WHERE table_schema='%s' and table_name = '%s' 
 ORDER BY table_name, ordinal_position;
-`, tableName)
+`, tableSchema, tableName)
 
 	res, err := db.Query(identitySQL)
 	if err != nil {
