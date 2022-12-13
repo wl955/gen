@@ -22,7 +22,7 @@ func LoadMysqlMeta(db *sql.DB, sqlType, sqlDatabase, tableName string) (DbTableM
 		return nil, err
 	}
 
-	ddl, err := mysqlLoadDDL(db, sqlDatabase, tableName)
+	ddl, err := mysqlLoadDDL(db, tableName)
 	if err != nil {
 		return nil, fmt.Errorf("mysqlLoadDDL - unable to load ddl from mysql: %v", err)
 	}
@@ -109,8 +109,8 @@ func LoadMysqlMeta(db *sql.DB, sqlType, sqlDatabase, tableName string) (DbTableM
 	return m, nil
 }
 
-func mysqlLoadDDL(db *sql.DB, tableSchema, tableName string) (ddl string, err error) {
-	ddlSQL := fmt.Sprintf("SHOW CREATE TABLE `%s.%s`;", tableSchema, tableName)
+func mysqlLoadDDL(db *sql.DB, tableName string) (ddl string, err error) {
+	ddlSQL := fmt.Sprintf("SHOW CREATE TABLE `%s`;", tableName)
 	res, err := db.Query(ddlSQL)
 	if err != nil {
 		return "", fmt.Errorf("unable to load ddl from mysql: %v", err)
