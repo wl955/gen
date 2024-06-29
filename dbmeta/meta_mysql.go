@@ -53,8 +53,8 @@ func LoadMysqlMeta(db *sql.DB, sqlType, sqlDatabase, tableName string) (DbTableM
 		columnType, columnLen := ParseSQLType(v.DatabaseTypeName())
 
 		if isUnsigned {
-			notes = notes + " column is set for unsigned"
-			columnType = "u" + columnType
+			//notes = notes + " column is set for unsigned"
+			//columnType = "u" + columnType
 		}
 
 		comment := ""
