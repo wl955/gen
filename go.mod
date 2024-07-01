@@ -16,7 +16,7 @@ require (
 	github.com/karrick/godirwalk v1.16.1 // indirect
 	github.com/lib/pq v1.10.0
 	github.com/logrusorgru/aurora v2.0.3+incompatible
-	github.com/mattn/go-sqlite3 v2.0.3+incompatible
+	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/ompluscator/dynamic-struct v1.3.0
 	github.com/rogpeppe/go-internal v1.6.2 // indirect
 	github.com/serenize/snaker v0.0.0-20171204205717-a683aaf2d516
