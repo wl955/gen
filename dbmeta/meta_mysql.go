@@ -38,7 +38,7 @@ func LoadMysqlMeta(db *sql.DB, sqlType, sqlDatabase, tableName string) (DbTableM
 	m.columns = make([]*columnMeta, len(cols))
 
 	for i, v := range cols {
-		notes := ""
+		//notes := ""
 		nullable, ok := v.Nullable()
 		if !ok {
 			nullable = false
@@ -88,8 +88,8 @@ func LoadMysqlMeta(db *sql.DB, sqlType, sqlDatabase, tableName string) (DbTableM
 			defaultVal:       defaultVal,
 			columnType:       columnType,
 			columnLen:        columnLen,
-			notes:            strings.Trim(notes, " "),
-			comment:          comment,
+			//notes:            strings.Trim(notes, " "),
+			comment: comment,
 		}
 
 		dbType := strings.ToLower(colMeta.DatabaseTypeName())

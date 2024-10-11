@@ -100,6 +100,7 @@ type PostgresInformationSchema struct {
 	IsNullable             string
 	IsIdentity             string
 	PrimaryKey             bool
+	Comment                string
 }
 
 // LoadTableInfoFromPostgresInformationSchema fetch info from information_schema for postgres database

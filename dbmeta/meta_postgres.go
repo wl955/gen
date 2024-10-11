@@ -24,14 +24,18 @@ func LoadPostgresMeta(db *sql.DB, sqlType, sqlDatabase, tableName string) (DbTab
 	}
 	m.columns = make([]*columnMeta, len(cols))
 
-	colInfo, err := LoadTableInfoFromPostgresInformationSchema(db, tableName)
+	colInfoMap, err := LoadTableInfoFromPostgresInformationSchema(db, tableName)
 	if err != nil {
 		return nil, fmt.Errorf("unable to load identity info schema from postgres table: %s error: %v", tableName, err)
 	}
 
-	err = postgresLoadPrimaryKey(db, tableName, colInfo)
+	err = postgresLoadPrimaryKey(db, tableName, colInfoMap)
 	if err != nil {
 		return nil, fmt.Errorf("unable to load primary key from postgres: %v", err)
+	}
+
+	if err = postgresLoadComments(db, tableName, colInfoMap); err != nil {
+		return nil, fmt.Errorf("unable to load comments from postgres: %v", err)
 	}
 
 	for i, v := range cols {
@@ -43,13 +47,15 @@ func LoadPostgresMeta(db *sql.DB, sqlType, sqlDatabase, tableName string) (DbTab
 		isAutoIncrement := false
 		isPrimaryKey := i == 0
 		var maxLen int64
+		comment := ""
 
 		maxLen = -1
-		colInfo, ok := colInfo[v.Name()]
+		colInfo, ok := colInfoMap[v.Name()]
 		if ok {
 			nullable = colInfo.IsNullable == "YES"
 			isAutoIncrement = colInfo.IsIdentity == "YES"
 			isPrimaryKey = colInfo.PrimaryKey
+			comment = colInfo.Comment
 
 			if colInfo.ColumnDefault != nil {
 				defaultVal = cleanupDefault(fmt.Sprintf("%v", colInfo.ColumnDefault))
@@ -79,6 +85,7 @@ func LoadPostgresMeta(db *sql.DB, sqlType, sqlDatabase, tableName string) (DbTab
 			columnLen:        maxLen,
 			columnType:       definedType,
 			defaultVal:       defaultVal,
+			comment:          comment,
 		}
 
 		m.columns[i] = colMeta
@@ -101,6 +108,36 @@ func LoadPostgresMeta(db *sql.DB, sqlType, sqlDatabase, tableName string) (DbTab
 		}
 	}
 	return m, nil
+}
+
+func postgresLoadComments(db *sql.DB, tableName string, colInfoMap map[string]*PostgresInformationSchema) (e error) {
+	query := fmt.Sprintf(`SELECT column_name, COALESCE(col_description(('%s'::regclass)::oid, ordinal_position), '') AS comment
+FROM information_schema.columns
+WHERE table_name = '%s';`, tableName, tableName)
+	res, err := db.Query(query)
+	if err != nil {
+		return fmt.Errorf("unable to load ddl from ms sql: %v", err)
+	}
+	defer res.Close()
+
+	for res.Next() {
+		var columnName string
+		comment := ""
+		err = res.Scan(&columnName, &comment)
+		if err != nil {
+			return fmt.Errorf("unable to load identity info from ms sql Scan: %v", err)
+		}
+
+		// fmt.Printf("## PRIMARY KEY COLUMN_NAME: %s\n", columnName)
+		colInfo, ok := colInfoMap[columnName]
+		if ok {
+			colInfo.Comment = comment
+			//colInfo.PrimaryKey = true
+			// fmt.Printf("name: %s primary_key: %t\n", colInfo.name, colInfo.primary_key)
+		}
+	}
+
+	return
 }
 
 func postgresLoadPrimaryKey(db *sql.DB, tableName string, colInfo map[string]*PostgresInformationSchema) error {
